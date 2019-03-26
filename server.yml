@@ -1,0 +1,97 @@
+---
+- name: create the gcp disk, firewall rule, and vm instance
+  hosts: localhost
+  gather_facts: no
+
+  vars_files:
+    - vars/vars-gcp.yml
+
+  tasks:
+    - name: check for existing disk
+      command: >
+        gcloud compute disks describe {{ disk_name }}
+        --zone {{ zone }}
+      register: disk 
+      changed_when: no
+      ignore_errors: yes
+
+    - name: create the disk
+      command: >
+        gcloud compute disks create "{{ disk_name }}"
+        --size "{{ disk_size }}"
+        --type "{{ disk_type }}"
+        --zone {{ zone }}
+        --image-project ubuntu-os-cloud
+        --image-family "{{ vm_os }}"
+        --licenses 'https://www.googleapis.com/compute/v1/projects/vm-options/global/licenses/enable-vmx'
+        --quiet
+      when: disk.rc != 0
+
+    - name: check for existing firewall rule (openvpn)
+      command: >
+        gcloud compute firewall-rules describe {{ fr_name }}
+      register: firewall
+      changed_when: no
+      ignore_errors: yes
+
+    - name: create the firewall rule (openvpn)
+      command: >
+        gcloud compute firewall-rules create {{ fr_name }}
+        --direction=INGRESS
+        --priority=1000
+        --network=default
+        --action=ALLOW
+        --rules=udp:1194
+        --source-ranges=0.0.0.0/0
+        --target-tags={{ net_tag }}
+      when: firewall.rc != 0
+
+    - name: check for existing vm instance
+      command: >
+        gcloud compute instances describe {{ vm_name }}
+        --zone {{ zone }}
+      register: server
+      changed_when: no
+      ignore_errors: yes
+
+    - name: create the instance
+      command: >
+        gcloud compute instances create {{ vm_name }}
+        --zone {{ zone }}
+        --machine-type {{ vm_type }}
+        --min-cpu-platform "{{ vm_cpu }}"
+        --disk name={{ disk_name }},boot=yes
+        --tags {{ net_tag }}
+        --metadata startup-script='apt-get -qq update && apt-get -qq install python-minimal'
+      when: server.rc != 0
+
+    - name: pause to allow python2 install to complete
+      pause:
+        minutes: 1
+      when: server.rc != 0
+
+    - name: check the vm instance state
+      command: >
+        gcloud compute instances describe {{ vm_name }}
+        --zone={{ zone }}
+        --format="value(status)"
+      register: state
+      changed_when: no
+
+    - name: fail if the vm instance is stopped
+      fail:
+        msg: "The {{ vm_name }} instance may need to be started."
+      when: state.stdout.find('RUNNING') == -1
+
+    - name: populate ssh config files with host entry
+      command: gcloud compute config-ssh --quiet
+      changed_when: no
+
+    - name: get the vm instance public ipv4 address
+      command: >
+        gcloud compute instances describe {{ vm_name }}
+        --zone={{ zone }}
+        --format="value(networkInterfaces[0].accessConfigs[0].natIP)"
+      register: public_ip
+      changed_when: no
+
