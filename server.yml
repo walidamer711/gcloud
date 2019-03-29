@@ -23,8 +23,8 @@
         --zone {{ zone }}
         --image-project ubuntu-os-cloud
         --image-family "{{ vm_os }}"
-        --network-interface ''
-        --network-interface subnet=net2-subnet-b,private-network-ip=10.129.0.2,no-address
+        --network-interface subnet=sub10,private-network-ip=10.10.10.3,no-address
+        --network-interface subnet=sub20,private-network-ip=10.10.20.3,no-address
         --licenses 'https://www.googleapis.com/compute/v1/projects/vm-options/global/licenses/enable-vmx'
         --quiet
       when: disk.rc != 0
@@ -66,34 +66,3 @@
         --tags {{ net_tag }}
         --metadata startup-script='apt-get -qq update && apt-get -qq install python-minimal'
       when: server.rc != 0
-
-    - name: pause to allow python2 install to complete
-      pause:
-        minutes: 1
-      when: server.rc != 0
-
-    - name: check the vm instance state
-      command: >
-        gcloud compute instances describe {{ vm_name }}
-        --zone={{ zone }}
-        --format="value(status)"
-      register: state
-      changed_when: no
-
-    - name: fail if the vm instance is stopped
-      fail:
-        msg: "The {{ vm_name }} instance may need to be started."
-      when: state.stdout.find('RUNNING') == -1
-
-    - name: populate ssh config files with host entry
-      command: gcloud compute config-ssh --quiet
-      changed_when: no
-
-    - name: get the vm instance public ipv4 address
-      command: >
-        gcloud compute instances describe {{ vm_name }}
-        --zone={{ zone }}
-        --format="value(networkInterfaces[0].accessConfigs[0].natIP)"
-      register: public_ip
-      changed_when: no
-
