@@ -61,11 +61,10 @@
         --machine-type {{ vm_type }}
         --min-cpu-platform "{{ vm_cpu }}"
         --disk name={{ disk_name }},boot=yes
-        --network-interface 
-        --network-interface subnet=sub10,no-address
         --tags {{ net_tag }}
         --metadata startup-script='apt-get -qq update && apt-get -qq install python-minimal'
       when: server.rc != 0
+
     - name: pause to allow python2 install to complete
       pause:
         minutes: 1
@@ -109,3 +108,48 @@
         group: gns3
       changed_when: no
 
+- name: install and configure gns3 components
+  hosts: gns3
+  connection: ssh
+
+  vars_files:
+    - vars/vars-gns3.yml
+
+  tasks:
+    - name: create gns3 user
+      user:
+        name: gns3
+        home: /opt/gns3
+        system: yes
+      become: yes
+
+    - name: create source code directory for gns3 components
+      file:
+        path: "{{ src_dir }}"
+        state: directory
+
+    - import_tasks: tasks/duckdns.yml
+    - import_tasks: tasks/openvpn.yml
+    - import_tasks: tasks/i386-arch.yml
+    - import_tasks: tasks/dynamips.yml
+    - import_tasks: tasks/vpcs.yml
+    - import_tasks: tasks/iouyap.yml
+    - import_tasks: tasks/iol.yml
+    - import_tasks: tasks/ubridge.yml
+    - import_tasks: tasks/qemu.yml
+    - import_tasks: tasks/libvirt.yml
+    - import_tasks: tasks/docker.yml
+    - import_tasks: tasks/gns3.yml
+
+  handlers:
+    - name: restart openvpn
+      service:
+        name: openvpn-server@server
+        state: restarted
+      become: yes
+
+    - name: restart gns3
+      service:
+        name: gns3
+        state: restarted
+      become: yes
