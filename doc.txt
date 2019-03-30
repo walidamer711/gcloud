@@ -2,7 +2,7 @@ gcloud compute instances create vm1 \
         --zone europe-west1-c \
         --machine-type n1-standard-1 \
         --disk name=vm1-disk,boot=yes \
-        --network-interface subnet=sub10 \
+        --network-interface '' \
         --network-interface subnet=sub30
 
 gcloud compute instances describe vm1 \
