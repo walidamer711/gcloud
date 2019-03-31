@@ -63,7 +63,6 @@
         --disk name={{ disk_name }},boot=yes
         --network-interface subnet=default
         --network-interface subnet=sub10,no-address
-        --network-interface subnet=sub30,no-address
         --tags {{ net_tag }}
         --metadata startup-script='apt-get -qq update && apt-get -qq install python-minimal'
       when: server.rc != 0
