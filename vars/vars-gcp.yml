@@ -7,17 +7,20 @@ project: gns3
 zone: europe-west1-c
 
 # https://cloud.google.com/free
-disk_name: vm1-disk
-disk_size: 30GB
+disk_name: vpnserver-disk
+disk_size: 10GB
 disk_type: pd-standard  # pd-ssd
 
 fr_name: default-allow-openvpn
-net_tag: vm1
+net_tag: vpn1
     
-vm_name: vm1
+vm_name: vpnserver
 # https://cloud.google.com/compute/pricing
 vm_type: n1-standard-1
 # https://cloud.google.com/compute/docs/cpu-platforms
 vm_cpu: 'Intel Skylake'  # 'Intel Haswell'
 # gcloud compute images list --filter="name~'ubuntu-minimal-1804'"
 vm_os: ubuntu-minimal-1804-lts
+# https://www.duckdns.org
+ddns_domain: vpngc
+ddns_token: 8c892437-f280-410c-a7f4-99d8a453a372

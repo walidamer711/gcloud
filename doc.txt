@@ -1,8 +1,7 @@
-gcloud compute instances create vm1 \
+gcloud compute instances create vm2 \
         --zone europe-west1-c \
         --machine-type n1-standard-1 \
-        --disk name=vm1-disk,boot=yes \
-        --network-interface '' \
+        --network-interface subnet=default \
         --network-interface subnet=sub30
 
 gcloud compute instances describe vm1 \
@@ -11,3 +10,5 @@ gcloud compute instances describe vm1 \
 gcloud compute instances describe vm2 \
         --zone=europe-west1-c \
         --format="value(networkInterfaces[0].accessConfigs[0].natIP)"
+
+gcloud compute disks list

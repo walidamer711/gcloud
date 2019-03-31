@@ -61,7 +61,8 @@
         --machine-type {{ vm_type }}
         --min-cpu-platform "{{ vm_cpu }}"
         --disk name={{ disk_name }},boot=yes
-        --network-interface subnet=sub10
+        --network-interface subnet=default
+        --network-interface subnet=sub10,no-address
         --network-interface subnet=sub30,no-address
         --tags {{ net_tag }}
         --metadata startup-script='apt-get -qq update && apt-get -qq install python-minimal'
@@ -106,6 +107,25 @@
     - name: add host to gns3 group
       add_host:
         name: "{{ public_ip.stdout }}"
-        group: gns3
+        group: vpnserver
       changed_when: no
+
+
+- name: install and configure openvpn components
+  hosts: vpnserver
+  connection: ssh
+
+  vars_files:
+    - vars/vars-gcp.yml
+
+  tasks:
+    - import_tasks: tasks/duckdns.yml
+    - import_tasks: tasks/openvpn.yml
+  
+  handlers:
+    - name: restart openvpn
+      service:
+        name: openvpn-server@server
+        state: restarted
+      become: yes
 
