@@ -36,8 +36,8 @@
     
 - name: create openvpn client configuration file
   template:
-    src: gns3server.ovpn.j2
-    dest: "{{ ansible_env.HOME }}/openvpn-client/gns3server.ovpn"
+    src: vpnserver.ovpn.j2
+    dest: "{{ ansible_env.HOME }}/openvpn-client/vpnserver.ovpn"
 
 - name: copy secret.key to openvpn client package directory
   copy:
