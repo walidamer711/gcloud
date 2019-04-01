@@ -112,7 +112,6 @@
 
 - name: install and configure openvpn components
   hosts: vpnserver
-  gather_facts: no
   connection: ssh
 
   vars_files:
