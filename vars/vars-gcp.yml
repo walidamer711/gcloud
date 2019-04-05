@@ -11,7 +11,7 @@ disk_name: vpnserver-disk
 disk_size: 10GB
 disk_type: pd-standard  # pd-ssd
 
-fr_name: default-allow-openvpn
+fr_name: vpnserver-allow-openvpn
 net_tag: vpn1
     
 vm_name: vpnserver
