@@ -12,3 +12,28 @@ gcloud compute instances describe vm2 \
         --format="value(networkInterfaces[0].accessConfigs[0].natIP)"
 
 gcloud compute disks list
+
+gcloud compute routes create openvpnnet \
+    --destination-range=172.16.252.0/24 \
+    --network=reginavpc1 \
+    --next-hop-instance=vpnserver
+
+
+on macbook:
+sudo route add -net 172.17.0.0 -netmask 255.255.255.0 -interface utun1
+The following command will show the existing routing table (IPv4 only):
+netstat -nr -f inet
+
+on vpnserver:
+sudo apt-get install nano
+sudo nano /etc/sysctl.conf
+net.ipv4.ip_forward=1
+To update session settings, run:
+sudo sysctl -p
+sudo systemctl status openvpn@server
+
+sudo apt-get update
+sudo apt-get install iputils-ping
+
+duck dns automatic IP address update:
+https://www.duckdns.org/update?domains=vpngc&token=8c892437-f280-410c-a7f4-99d8a453a372&ip=
