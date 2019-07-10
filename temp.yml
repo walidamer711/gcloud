@@ -23,5 +23,5 @@
       register: firewall
       changed_when: no
       ignore_errors: yes
-    - name: print
-      debug: firewall
+    - debug:
+        var: firewall
