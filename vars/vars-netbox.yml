@@ -1,0 +1,16 @@
+project: gns3
+zone: europe-west1-c
+
+disk_name: netbox-disk
+disk_size: 20GB
+disk_type: pd-standard  # pd-ssd
+
+vm_name: netbox
+# https://cloud.google.com/compute/pricing
+vm_type: n1-standard-1
+vm_cpu: 'Intel Skylake'  # 'Intel Haswell'
+vm_os: ubuntu-1804-lts
+
+fr_name: netbox-allow-openvpn
+net_tag: netbox
+    

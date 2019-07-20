@@ -1,3 +1,7 @@
+gcloud compute disks describe {{ disk_name }}
+        --zone {{ zone }}
+--> check if the disk exists (result.rc != 0)
+
 gcloud compute instances create vm2 \
         --zone europe-west1-c \
         --machine-type n1-standard-1 \
@@ -5,7 +9,9 @@ gcloud compute instances create vm2 \
         --network-interface subnet=sub30
 
 gcloud compute instances describe vm1 \
-        --zone europe-west1-c
+        --zone europe-west1-c \
+        --format="value(status)"
+--> stdout.find('RUNNING') == -1 to check if vm is not running ("stdout": "RUNNING")
 
 gcloud compute instances describe vm2 \
         --zone=europe-west1-c \
@@ -37,3 +43,7 @@ sudo apt-get install iputils-ping
 
 duck dns automatic IP address update:
 https://www.duckdns.org/update?domains=vpngc&token=8c892437-f280-410c-a7f4-99d8a453a372&ip=
+
+Ansible:
+result.rc == 0 or != 0 (return code of the task result)
+changed_when: (Overriding The Changed Result)

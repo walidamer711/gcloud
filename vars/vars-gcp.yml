@@ -14,7 +14,7 @@ disk_type: pd-standard  # pd-ssd
 fr_name: vpnserver-allow-openvpn
 net_tag: vpn1
     
-vm_name: vpnserver
+vm_name: rtr
 # https://cloud.google.com/compute/pricing
 vm_type: n1-standard-1
 # https://cloud.google.com/compute/docs/cpu-platforms
