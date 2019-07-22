@@ -4,7 +4,7 @@
   gather_facts: no
 
   vars_files:
-    - vars/vars-gcp.yml
+    - vars/vars-netops.yml
 
   tasks:
     - name: check for existing vm instance

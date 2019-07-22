@@ -1,12 +1,14 @@
 ---
-- name: install openvpn to vm instance
+- name: create the gcp disk, firewall rule, and vm instance
   hosts: localhost
   gather_facts: no
 
   vars_files:
-    - vars/vars-gcp.yml
+    - vars/vars-netops.yml
 
   tasks:
+    - import_tasks: tasks/gcp-vm.yml
+    
     - name: check the vm instance state
       command: >
         gcloud compute instances describe {{ vm_name }}
@@ -19,11 +21,11 @@
       fail:
         msg: "The {{ vm_name }} instance may need to be started."
       when: state.stdout.find('RUNNING') == -1
-    
+
     - name: populate ssh config files with host entry
       command: gcloud compute config-ssh --quiet
       changed_when: no
-      
+
     - name: get the vm instance public ipv4 address
       command: >
         gcloud compute instances describe {{ vm_name }}
@@ -39,27 +41,8 @@
         delay: 10
         timeout: 60
 
-    - name: add host to vpnserver group
+    - name: add host to gns3 group
       add_host:
         name: "{{ public_ip.stdout }}"
         group: vpnserver
       changed_when: no
-
-- name: install and configure openvpn components
-  hosts: vpnserver
-  connection: ssh
-
-  vars_files:
-    - vars/vars-gcp.yml
-
-  tasks:
-    - import_tasks: tasks/duckdns.yml
-    - import_tasks: tasks/openvpn.yml
-  
-  handlers:
-    - name: restart openvpn
-      service:
-        name: openvpn-server@server
-        state: restarted
-      become: yes
-    
