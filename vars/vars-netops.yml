@@ -5,7 +5,7 @@ disk_name: netops-disk
 disk_size: 20GB
 disk_type: pd-standard
 
-vm_name: netbox
+vm_name: netops
 vm_type: n1-standard-1
 vm_cpu: 'Intel Skylake'
 vm_os: ubuntu-1804-lts
