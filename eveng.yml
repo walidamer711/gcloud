@@ -1,0 +1,22 @@
+---
+- name: install and configure netops components
+  hosts: eveng
+  connection: ssh
+  remote_user: root
+  become: yes
+  become_method: sudo
+
+  vars_files:
+    - vars/vars-eveng.yml
+    - vars/vars-gcp.yml
+  
+  tasks:
+    - import_tasks: tasks/duckdns.yml
+    - import_tasks: tasks/openvpn.yml
+
+  handlers:
+    - name: restart openvpn
+      service:
+        name: openvpn-server@server
+        state: restarted
+      become: yes
