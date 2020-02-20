@@ -24,6 +24,14 @@ gcloud compute routes create openvpnnet \
     --network=reginavpc1 \
     --next-hop-instance=vpnserver
 
+gcloud compute firewall-rules create sshrule2 \
+        --direction=INGRESS \
+        --priority=1000 \
+        --network=west1 \
+        --action=ALLOW \
+        --rules=tcp:22 \
+        --source-ranges=0.0.0.0/0 \
+        --target-tags=netops \
 ===========================================================================================
 gcloud auth configure-docker
 export PROJECT_ID=gns3-235219

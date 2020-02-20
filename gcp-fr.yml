@@ -9,19 +9,38 @@
   tasks:
     - name: check for existing firewall rule (openvpn)
       command: >
-        gcloud compute firewall-rules describe sshrule
+        gcloud compute firewall-rules describe sshrule2
       register: firewall
       changed_when: no
       ignore_errors: yes
 
     - name: create the firewall rule (openvpn)
       command: >
-        gcloud compute firewall-rules create sshrule
+        gcloud compute firewall-rules create sshrule2
         --direction=INGRESS
         --priority=1000
         --network=west1
         --action=ALLOW
         --rules=tcp:22
         --source-ranges=0.0.0.0/0
-        --target-tags={{ net_tag }}
+        --target-tags=netops
+      when: firewall.rc != 0
+
+    - name: check for existing firewall rule (http)
+      command: >
+        gcloud compute firewall-rules describe netops-http
+      register: firewall
+      changed_when: no
+      ignore_errors: yes
+
+    - name: create the firewall rule (http)
+      command: >
+        gcloud compute firewall-rules create netops-http
+        --direction=INGRESS
+        --priority=1000
+        --network=west1
+        --action=ALLOW
+        --rules=tcp:32768
+        --source-ranges=0.0.0.0/0
+        --target-tags=netops
       when: firewall.rc != 0
