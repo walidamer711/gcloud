@@ -18,7 +18,7 @@
     --licenses 'https://www.googleapis.com/compute/v1/projects/vm-options/global/licenses/enable-vmx'
     --quiet
   when: disk.rc != 0
-  
+
 - name: check for existing vm instance
   command: >
     gcloud compute instances describe {{ vm_name }}
@@ -34,7 +34,7 @@
     --machine-type {{ vm_type }}
     --min-cpu-platform "{{ vm_cpu }}"
     --disk name={{ disk_name }},boot=yes
-    --network-interface subnet=sub10
+    --network-interface subnet=sub11
     --can-ip-forward
     --tags {{ net_tag }}
     --metadata startup-script='apt-get -qq update'
