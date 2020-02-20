@@ -24,6 +24,60 @@ gcloud compute routes create openvpnnet \
     --network=reginavpc1 \
     --next-hop-instance=vpnserver
 
+===========================================================================================
+gcloud auth configure-docker
+export PROJECT_ID=gns3-235219
+gcloud projects describe gns3-235219
+
+docker images
+gcloud config set project $PROJECT_ID
+gcloud config set compute/zone us-west1-a
+
+docker tag netboxcommunity/netbox:latest gcr.io/gns3-235219/netbox
+gcloud docker push gcr.io/gns3-235219/netbox
+docker push gcr.io/gns3-235219/netbox
+gcloud container images list --repository=gcr.io/gns3-235219
+
+
+gcloud container clusters create tier-1-cluster \
+    --project service-project-1-id \
+    --zone=us-central1-a \
+    --enable-ip-alias \
+    --network projects/host-project-id/global/networks/shared-net \
+    --subnetwork projects/host-project-id/regions/us-central1/subnetworks/tier-1 \
+    --cluster-secondary-range-name tier-1-pods \
+    --services-secondary-range-name tier-1-services
+    
+gcloud container clusters create cl1 --subnetwork default
+NAME  LOCATION    MASTER_VERSION  MASTER_IP       MACHINE_TYPE   NODE_VERSION    NUM_NODES  STATUS
+cl1   us-west1-a  1.14.10-gke.17  104.198.12.236  n1-standard-1  1.14.10-gke.17  3          RUNNING
+
+gcloud compute instances list
+gke-cl1-default-pool-663e07c3-001n  us-west1-a      n1-standard-1               10.138.0.3               35.247.65.46    RUNNING
+gke-cl1-default-pool-663e07c3-5jjl  us-west1-a      n1-standard-1               10.138.0.4               35.233.183.237  RUNNING
+gke-cl1-default-pool-663e07c3-fb1g  us-west1-a      n1-standard-1               10.138.0.5               35.230.36.116   RUNNING
+
+kubectl create deployment hello-web --image=gcr.io/google-samples/hello-app:1.0
+kubectl get pods
+NAME                         READY   STATUS    RESTARTS   AGE
+hello-web-5677597687-qkqqm   1/1     Running   0          8s
+
+kubectl expose deployment hello-web --type=LoadBalancer --port 80 --target-port 8080
+kubectl get service hello-web
+NAME        TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)        AGE
+hello-web   LoadBalancer   10.35.255.173   34.82.146.149   80:32423/TCP   104s
+
+curl http://34.82.146.149:80
+Hello, world!
+Version: 1.0.0
+Hostname: hello-web-5677597687-qkqqm
+
+kubectl set image deployment/hello-web hello-app=gcr.io/google-samples/hello-app:2.0
+
+kubectl delete service hello-web
+gcloud container clusters delete cl1 --zone us-west1-a
+
+
 
 on macbook:
 sudo route add -net 10.10.10.0 -netmask 255.255.255.0 -interface utun3

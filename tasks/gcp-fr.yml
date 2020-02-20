@@ -1,0 +1,19 @@
+---
+- name: check for existing firewall rule (openvpn)
+  command: >
+    gcloud compute firewall-rules describe {{ fr_name }}
+  register: firewall
+  changed_when: no
+  ignore_errors: yes
+
+- name: create the firewall rule (openvpn)
+  command: >
+    gcloud compute firewall-rules create {{ fr_name }}
+    --direction=INGRESS
+    --priority=1000
+    --network=default
+    --action=ALLOW
+    --rules=udp:1194
+    --source-ranges=0.0.0.0/0
+    --target-tags={{ net_tag }}
+  when: firewall.rc != 0
