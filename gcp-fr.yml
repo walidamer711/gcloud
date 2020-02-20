@@ -8,11 +8,11 @@
   
   tasks:
     - name: check for existing firewall rule (openvpn)
-    command: >
-      gcloud compute firewall-rules describe ssh_rule
-    register: firewall
-    changed_when: no
-    ignore_errors: yes
+      command: >
+        gcloud compute firewall-rules describe ssh_rule
+      register: firewall
+      changed_when: no
+      ignore_errors: yes
 
     - name: create the firewall rule (openvpn)
       command: >
