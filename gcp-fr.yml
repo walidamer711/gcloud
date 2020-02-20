@@ -1,0 +1,27 @@
+---
+- name: create the gcp disk, firewall rule, and vm instance
+  hosts: localhost
+  gather_facts: no
+
+  vars_files:
+    - vars/vars-netops.yml
+  
+  tasks:
+    - name: check for existing firewall rule (openvpn)
+    command: >
+      gcloud compute firewall-rules describe ssh_rule
+    register: firewall
+    changed_when: no
+    ignore_errors: yes
+
+    - name: create the firewall rule (openvpn)
+      command: >
+        gcloud compute firewall-rules create ssh_rule
+        --direction=INGRESS
+        --priority=1000
+        --network=default
+        --action=ALLOW
+        --rules=tcp:22
+        --source-ranges=0.0.0.0/0
+        --target-tags={{ net_tag }}
+      when: firewall.rc != 0
