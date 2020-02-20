@@ -9,14 +9,14 @@
   tasks:
     - name: check for existing firewall rule (openvpn)
       command: >
-        gcloud compute firewall-rules describe ssh_rule
+        gcloud compute firewall-rules describe sshrule
       register: firewall
       changed_when: no
       ignore_errors: yes
 
     - name: create the firewall rule (openvpn)
       command: >
-        gcloud compute firewall-rules create ssh_rule
+        gcloud compute firewall-rules create sshrule
         --direction=INGRESS
         --priority=1000
         --network=default
