@@ -32,7 +32,12 @@ gcloud compute firewall-rules create sshrule2 \
         --rules=tcp:22 \
         --source-ranges=0.0.0.0/0 \
         --target-tags=netops \
+
+
 ===========================================================================================
+===========
+containers:
+===========
 gcloud auth configure-docker
 export PROJECT_ID=gns3-235219
 gcloud projects describe gns3-235219
@@ -46,7 +51,6 @@ gcloud docker push gcr.io/gns3-235219/netbox
 docker push gcr.io/gns3-235219/netbox
 gcloud container images list --repository=gcr.io/gns3-235219
 
-
 gcloud container clusters create tier-1-cluster \
     --project service-project-1-id \
     --zone=us-central1-a \
@@ -55,7 +59,7 @@ gcloud container clusters create tier-1-cluster \
     --subnetwork projects/host-project-id/regions/us-central1/subnetworks/tier-1 \
     --cluster-secondary-range-name tier-1-pods \
     --services-secondary-range-name tier-1-services
-    
+
 gcloud container clusters create cl1 --subnetwork default
 NAME  LOCATION    MASTER_VERSION  MASTER_IP       MACHINE_TYPE   NODE_VERSION    NUM_NODES  STATUS
 cl1   us-west1-a  1.14.10-gke.17  104.198.12.236  n1-standard-1  1.14.10-gke.17  3          RUNNING
@@ -86,9 +90,10 @@ kubectl delete service hello-web
 gcloud container clusters delete cl1 --zone us-west1-a
 
 
-
+===========
 on macbook:
-sudo route add -net 10.10.10.0 -netmask 255.255.255.0 -interface utun3
+===========
+sudo route add -net 10.11.11.0 -netmask 255.255.255.0 -interface utun2
 #sudo networksetup -setadditionalroutes utun3 10.10.10.0 255.255.255.0 172.16.252.1
 The following command will show the existing routing table (IPv4 only):
 netstat -nr -f inet
@@ -100,7 +105,9 @@ ssh-keygen -t rsa
 save this key to the clipboard
 pbcopy < ~/.ssh/id_rsa.pub
 
+===========
 on vpnserver:
+===========
 sudo apt-get install nano
 sudo nano /etc/sysctl.conf
 net.ipv4.ip_forward=1
@@ -114,7 +121,9 @@ sudo apt-get install iputils-ping
 duck dns automatic IP address update:
 https://www.duckdns.org/update?domains=vpngc&token=8c892437-f280-410c-a7f4-99d8a453a372&ip=
 
+===========
 Ansible:
+===========
 result.rc == 0 or != 0 (return code of the task result)
 changed_when: (Overriding The Changed Result)
 

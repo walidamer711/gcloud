@@ -1,0 +1,160 @@
+
+systemctl status NetworkManager
+ip addr show
+nmcli
+nmcli device show
+nmcli device show eth0
+nmcli connection show
+ip route show
+routel
+
+dns@centos
+bind-utils
+dig -4 www.google.com
+dig -4 www.google.com +trace
+==============
+vpn
+==============
+sudo systemctl restart network.service
+net.ipv4.ip_forward = 1
+sudo systemctl restart network.service
+
+sudo yum -y install epel-release
+sudo yum -y install openvpn
+sudo yum -y install easy-rsa
+
+sudo firewall-cmd --permanent --add-service openvpn
+sudo firewall-cmd --list-services
+sudo firewall-cmd --permanent --add-masquerade
+sudo firewall-cmd --reload
+
+sudo mkdir /etc/openvpn/easy-rsa
+cd /etc/openvpn/easy-rsa
+PATH=$PATH:/usr/share/easy-rsa/3.0.6/
+sudo chown cloud_user /etc/openvpn/easy-rsa/
+easyrsa init-pki
+easyrsa build-ca   #pass 1234
+easyrsa gen-dh
+easyrsa gen-req server nopass
+easyrsa sign-req server server
+easyrsa gen-req client nopass
+easyrsa sign-req client client
+cd /etc/openvpn
+sudo openvpn --genkey --secret pfs.key
+
+port 1194
+proto udp
+dev tun
+ca /etc/openvpn/easy-rsa/pki/ca.crt
+cert /etc/openvpn/easy-rsa/pki/issued/server.crt
+key /etc/openvpn/easy-rsa/pki/private/server.key
+dh /etc/openvpn/easy-rsa/pki/dh.pem
+topology subnet
+cipher AES-256-CBC
+auth SHA512
+server 10.8.0.0 255.255.255.0
+ifconfig-pool-persist ipp.txt
+keepalive 10 120
+comp-lzo
+persist-key
+persist-tun
+status openvpn-status.log
+log-append openvpn.log
+verb 3
+tls-server
+tls-auth /etc/openvpn/pfs.key
+
+sudo systemctl enable openvpn@server.service
+sudo systemctl start openvpn@server.service
+
+sudo cd /etc/openvpn
+sudo mkdir -p server1/keys
+sudo cp pfs.key server1/keys
+sudo cp easy-rsa/pki/dh.pem server1/keys
+sudo cp easy-rsa/pki/ca.crt server1/keys
+sudo cp easy-rsa/pki/private/ca.key server1/keys
+sudo cp easy-rsa/pki/private/client.key server1/keys
+sudo cp easy-rsa/pki/issued/client.crt server1/keys
+sudo tar cvzf /tmp/keys.tgz server1/
+
+==========
+client
+==========
+sudo scp -i .ssh/id_rsa reginaoncloud@35.247.110.131:/tmp/keys.tgz ./
+
+cd /etc/openvpn
+sudo scp cloud_user@10.0.1.10:/tmp/keys.tgz ./
+sudo tar xvzf keys.tgz
+
+client
+dev tun
+proto udp
+remote 35.247.110.131 1194  
+ca server1/keys/ca.crt
+cert server1/keys/client.crt
+key server1/keys/client.key
+tls-version-min 1.2
+tls-cipher TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA256
+cipher AES-256-CBC
+auth SHA512
+resolv-retry infinite
+auth-retry none
+nobind
+route-nopull
+persist-key
+persist-tun
+ns-cert-type server
+comp-lzo
+verb 3
+tls-client
+tls-auth server1/keys/pfs.key
+
+client
+dev tun
+proto udp
+remote 35.247.110.131 1194  
+ca ca.crt
+cert client.crt
+key client.key
+tls-version-min 1.2
+tls-cipher TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA256
+cipher AES-256-CBC
+auth SHA512
+resolv-retry infinite
+auth-retry none
+nobind
+route 10.11.11.0 255.255.255.0
+route-metric 50
+route-nopull
+persist-key
+persist-tun
+ns-cert-type server
+comp-lzo
+verb 3
+tls-client
+tls-auth pfs.key
+
+
+==========
+NAT server
+==========
+
+Optional: Log in to your NAT gateway via SSH to configure iptables to NAT traffic to the internet.
+
+Note: These examples assume the interface is called eth0. Different Linux distributions use different names for interfaces. Modify the name of the interface in commands to match your distribution.
+
+On your NAT gateway instance, configure iptables:
+
+sudo sysctl -w net.ipv4.ip_forward=1
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+The first sudo command tells the kernel you want to allow IP forwarding. The second sudo command masquerades packets received from internal instances as if they were sent from the NAT gateway instance.
+
+To inspect your iptables NAT rules, use the list option:
+
+sudo iptables -v -L -t nat
+
+Optional: If you want these settings to persist across future reboots:
+
+sudo echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/20-natgw.conf
+sudo apt-get install iptables-persistent

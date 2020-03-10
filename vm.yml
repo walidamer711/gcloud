@@ -4,7 +4,7 @@
   gather_facts: no
 
   vars_files:
-    - vars/vars-gcp.yml
+    - vars/vars-vm.yml
 
   tasks:
     - name: check for existing disk
@@ -39,7 +39,7 @@
         gcloud compute firewall-rules create {{ fr_name }}
         --direction=INGRESS
         --priority=1000
-        --network=default
+        --network=west1
         --action=ALLOW
         --rules=tcp:22
         --source-ranges=0.0.0.0/0
@@ -61,15 +61,8 @@
         --machine-type {{ vm_type }}
         --min-cpu-platform "{{ vm_cpu }}"
         --disk name={{ disk_name }},boot=yes
-        --network-interface subnet=default
-        --network-interface subnet=sub10,no-address
-        --can-ip-forward
+        --network-interface subnet={{subnet}}
         --tags {{ net_tag }}
-        --metadata startup-script='apt-get -qq update && apt-get -qq install python-minimal'
-      when: server.rc != 0
-    - name: pause to allow python2 install to complete
-      pause:
-        minutes: 1
       when: server.rc != 0
 
     - name: check the vm instance state
@@ -104,28 +97,4 @@
         delay: 10
         timeout: 60
 
-    - name: add host to gns3 group
-      add_host:
-        name: "{{ public_ip.stdout }}"
-        group: vpnserver
-      changed_when: no
-
-
-- name: install and configure openvpn components
-  hosts: vpnserver
-  connection: ssh
-
-  vars_files:
-    - vars/vars-gcp.yml
-
-  tasks:
-    - import_tasks: tasks/duckdns.yml
-    - import_tasks: tasks/openvpn.yml
-  
-  handlers:
-    - name: restart openvpn
-      service:
-        name: openvpn-server@server
-        state: restarted
-      become: yes
 

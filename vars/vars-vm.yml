@@ -1,0 +1,25 @@
+---
+# https://console.cloud.google.com/iam-admin/settings/project
+# `gcloud config get-value project` to output Project ID value
+project: gns3
+# https://cloud.google.com/compute/docs/regions-zones
+# `gcloud compute zones list` to list GCE zones
+zone: us-west1-a
+
+# https://cloud.google.com/free
+disk_name: vm1-disk
+disk_size: 10GB
+disk_type: pd-standard  # pd-ssd
+
+fr_name: vm-allow-ssh
+net_tag: vm
+    
+vm_name: vm1
+# https://cloud.google.com/compute/pricing
+vm_type: n1-standard-1
+# https://cloud.google.com/compute/docs/cpu-platforms
+vm_cpu: 'Intel Skylake'  # 'Intel Haswell'
+# gcloud compute images list --filter="name~'centos-7'"
+vm_os: centos-7
+
+subnet: sub11
