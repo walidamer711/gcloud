@@ -61,7 +61,8 @@
         --machine-type {{ vm_type }}
         --min-cpu-platform "{{ vm_cpu }}"
         --disk name={{ disk_name }},boot=yes
-        --network-interface subnet={{subnet}}
+        --network-interface subnet=sub11
+        --can-ip-forward
         --tags {{ net_tag }}
       when: server.rc != 0
 

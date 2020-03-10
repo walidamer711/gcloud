@@ -5,3 +5,6 @@ localhost ansible_connection=local
 
 [eveng]
 34.82.51.95
+
+[vm1]
+35.185.198.140
